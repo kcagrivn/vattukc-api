@@ -1,0 +1,46 @@
+name: ⚙️ Deploy API to VPS
+
+on:
+  push:
+    branches: [ "main" ]   # Tự động chạy khi push code lên nhánh main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script_stop: true
+        script: |
+          set -e
+          echo "[1/6] Đi tới thư mục API trên VPS"
+          cd /var/www/vattukc-api
+
+          echo "[2/6] Cập nhật code mới nhất"
+          git fetch --all
+          git reset --hard origin/main
+          git pull --rebase origin main
+
+          echo "[3/6] Cài dependencies"
+          npm ci || npm install --force
+
+          echo "[4/6] Build (nếu có)"
+          npm run build || echo "Không có script build, bỏ qua"
+
+          echo "[5/6] Restart PM2"
+          pm2 describe vattukc-api >/dev/null 2>&1 \
+            && pm2 restart vattukc-api \
+            || pm2 start npm --name "vattukc-api" -- run start
+
+          echo "[6/6] Lưu process list"
+          pm2 save
+
+          echo "✅ Hoàn tất deploy API!"
