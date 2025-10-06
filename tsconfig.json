@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    /* ✅ Phiên bản ECMAScript mục tiêu (modern JS) */
+    "target": "ES2020",
+
+    /* ✅ Hệ thống module (Express/Node sử dụng CommonJS) */
+    "module": "CommonJS",
+
+    /* ✅ Cách TypeScript tìm module */
+    "moduleResolution": "Node",
+
+    /* ✅ Cho phép import/export theo cú pháp ES6 (fix lỗi import express...) */
+    "esModuleInterop": true,
+
+    /* ✅ Bắt lỗi tên file không thống nhất */
+    "forceConsistentCasingInFileNames": true,
+
+    /* ✅ Bật kiểm tra nghiêm ngặt (giúp code an toàn hơn) */
+    "strict": true,
+
+    /* ✅ Bỏ qua check trong node_modules */
+    "skipLibCheck": true,
+
+    /* ✅ Thư mục xuất file build */
+    "outDir": "dist",
+
+    /* ✅ Cho phép debug dễ dàng */
+    "sourceMap": true
+  },
+
+  /* ✅ Thư mục chứa code TypeScript */
+  "include": ["src"],
+
+  /* ✅ Bỏ qua các thư mục không cần thiết */
+  "exclude": ["node_modules", "dist"]
+}
+
