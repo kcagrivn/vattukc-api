@@ -44,3 +44,9 @@ jobs:
           pm2 save
 
           echo "✅ Hoàn tất deploy API!"
+                    echo "[7/7] Gửi thông báo Telegram"
+          MESSAGE="✅ Triển khai API thành công trên VPS!%0A📦 Repo: vattukc-api%0A🚀 Branch: main%0A🕒 $(date +'%Y-%m-%d %H:%M:%S')"
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d "text=${MESSAGE}"
+
