@@ -1,4 +1,4 @@
-name: ⚙️ Deploy API to VPS
+name: ⚙️ Deploy API to VPS (Auto + Telegram)
 
 on:
   push:
@@ -9,9 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # ------------------------------------------
+    # 1️⃣ Lấy code mới nhất từ repo GitHub
+    # ------------------------------------------
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # ------------------------------------------
+    # 2️⃣ Triển khai API lên VPS qua SSH
+    # ------------------------------------------
     - name: Deploy via SSH
       uses: appleboy/ssh-action@v0.1.10
       with:
@@ -21,32 +27,36 @@ jobs:
         script_stop: true
         script: |
           set -e
-          echo "[1/6] Đi tới thư mục API trên VPS"
+
+          echo "[1/7] Đi tới thư mục API trên VPS"
           cd /var/www/vattukc-api
 
-          echo "[2/6] Cập nhật code mới nhất"
+          echo "[2/7] Cập nhật code mới nhất từ GitHub"
           git fetch --all
           git reset --hard origin/main
           git pull --rebase origin main
 
-          echo "[3/6] Cài dependencies"
+          echo "[3/7] Cài dependencies"
           npm ci || npm install --force
 
-          echo "[4/6] Build (nếu có)"
+          echo "[4/7] Build (nếu có)"
           npm run build || echo "Không có script build, bỏ qua"
 
-          echo "[5/6] Restart PM2"
+          echo "[5/7] Restart PM2 process"
           pm2 describe vattukc-api >/dev/null 2>&1 \
             && pm2 restart vattukc-api \
             || pm2 start npm --name "vattukc-api" -- run start
 
-          echo "[6/6] Lưu process list"
+          echo "[6/7] Lưu danh sách process"
           pm2 save
 
           echo "✅ Hoàn tất deploy API!"
-                    echo "[7/7] Gửi thông báo Telegram"
+
+          # ------------------------------------------
+          # 7️⃣ Gửi thông báo về Telegram
+          # ------------------------------------------
+          echo "[7/7] Gửi thông báo Telegram"
           MESSAGE="✅ Triển khai API thành công trên VPS!%0A📦 Repo: vattukc-api%0A🚀 Branch: main%0A🕒 $(date +'%Y-%m-%d %H:%M:%S')"
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d "text=${MESSAGE}"
-
